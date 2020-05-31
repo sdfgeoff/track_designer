@@ -1,0 +1,27 @@
+{
+  "name": "track_designer",
+  "version": "1.0.0",
+  "description": "Web based tool for designing tracks",
+  "main": "index.js",
+  "devDependencies": {
+    "jest": "^25.1.0",
+    "jshint": "2.11.0"
+  },
+  "dependencies": {
+    "browserify": "^16.5.0",
+    "log4js": "6.1.1"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sdfgeoff/track_designer.git"
+  },
+  "author": "sdfgeoff",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/sdfgeoff/track_designer/issues"
+  },
+  "homepage": "https://github.com/sdfgeoff/track_designer#readme"
+}
