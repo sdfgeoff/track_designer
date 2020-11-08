@@ -22,22 +22,23 @@ pub fn generate_binary_stl(mesh: &Mesh) -> Vec<u8> {
         
         
         let normal = mesh.calc_face_normal(&face);
+        let normal = normal.normalize();
         
-        out.extend(&normal.x.to_le_bytes());
-        out.extend(&normal.y.to_le_bytes());
-        out.extend(&normal.z.to_le_bytes());
+        out.extend(&normal[0].to_le_bytes());
+        out.extend(&normal[1].to_le_bytes());
+        out.extend(&normal[2].to_le_bytes());
         
-        out.extend(&v0.x.to_le_bytes());
-        out.extend(&v0.y.to_le_bytes());
-        out.extend(&v0.z.to_le_bytes());
-        
-        out.extend(&v1.x.to_le_bytes());
-        out.extend(&v1.y.to_le_bytes());
-        out.extend(&v1.z.to_le_bytes());
-        
-        out.extend(&v2.x.to_le_bytes());
-        out.extend(&v2.y.to_le_bytes());
-        out.extend(&v2.z.to_le_bytes());
+        out.extend(&v0[0].to_le_bytes());
+        out.extend(&v0[1].to_le_bytes());
+        out.extend(&v0[2].to_le_bytes());
+
+        out.extend(&v1[0].to_le_bytes());
+        out.extend(&v1[1].to_le_bytes());
+        out.extend(&v1[2].to_le_bytes());
+
+        out.extend(&v2[0].to_le_bytes());
+        out.extend(&v2[1].to_le_bytes());
+        out.extend(&v2[2].to_le_bytes());
         
         out.extend(&u16::to_le_bytes(0));
     }

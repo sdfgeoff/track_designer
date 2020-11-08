@@ -1,6 +1,6 @@
 /// Tools are things that take in one mesh and output another new mesh.
-use super::mesh::{Mesh, Face, VertexGroup, VertWeight, Vertex, Vec3, dist_squared};
-use super::modifiers;
+use super::mesh::{Mesh, Face, VertexGroup, VertWeight, Vertex};
+use glam::Vec3;
 
 use std::collections::HashMap;
 
@@ -12,7 +12,7 @@ pub fn make_array(mesh: &Mesh, count:u32, offset: Vec3) -> Mesh {
     let mut array = Mesh::default();
     for i in 0..count {
         let mut next = mesh.clone();
-        next.linear_offset(offset.scale(i as f32));
+        next.linear_offset(offset * (i as f32));
         array.extend(&next);
     }
     array
@@ -56,13 +56,13 @@ pub fn generate_vertex_bridge(mesh1: &Mesh, mesh2: &Mesh, vertex_group_1: &Verte
     
     
     loop {
-        let vert_1 = &verts[loop_1[p1].vert_index as usize];
-        let vert_2 = &verts[loop_2[p2].vert_index as usize];
+        let vert_1 = verts[loop_1[p1].vert_index as usize];
+        let vert_2 = verts[loop_2[p2].vert_index as usize];
         
-        let vert_2_next = &verts[loop_2[p2 + 1].vert_index as usize];
+        let vert_2_next = verts[loop_2[p2 + 1].vert_index as usize];
 
-        let dist_here = dist_squared(&vert_1, &vert_2);
-        let dist_next = dist_squared(&vert_1, &vert_2_next);
+        let dist_here = (vert_1 - vert_2).length_squared();
+        let dist_next = (vert_1 - vert_2_next).length_squared();
         
 
         if dist_here < dist_next {
@@ -124,25 +124,6 @@ pub fn generate_vertex_bridge(mesh1: &Mesh, mesh2: &Mesh, vertex_group_1: &Verte
         faces: faces,
         vertex_groups: HashMap::new(),
     }
-}
-
-
-/// Makes a loop with the origin at the center)
-pub fn make_loop(mesh: &Mesh, duplicates: u32) -> Mesh {
-    let (_, _, dim) = mesh.calc_bounds();
-    
-    
-    let circumference = dim.y * (duplicates as f32);
-    let radius = circumference / (2.0 * std::f32::consts::PI);
-    
-    let mut loop_mesh = make_array(&mesh, duplicates, Vec3::new(0.0, dim.y, 0.0));
-    loop_mesh.linear_offset(Vec3::new(0.0, 0.0, radius));
-    
-    let length = dim.y;
-    
-    loop_mesh.bend(2.0 * std::f32::consts::PI / (length * (duplicates as f32)));
-    
-    loop_mesh
 }
 
 

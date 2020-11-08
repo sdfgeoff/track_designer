@@ -9,3 +9,5 @@ edition = "2018"
 [dependencies]
 meshtools={path="../meshtools"}
 resources={path="../resources"}
+glam="0.10.0"
+track_outer_surfaces={path="../track_outer_surfaces"}

@@ -1,4 +1,9 @@
 [workspace]
 
-members = ["site", "meshtools", "resources", "tracktool"]
-
+members = [
+    "site",
+    "meshtools",
+    "resources",
+    "tracktool",
+    "track_outer_surfaces",
+]

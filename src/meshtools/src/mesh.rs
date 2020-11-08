@@ -1,29 +1,10 @@
 use std::collections::HashMap;
+use glam::Vec3;
 
 
-#[derive(Clone)]
 /// A point in space, often used to represent the corner of a triangle
-pub struct Vec3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
-
 pub type Vertex = Vec3;
 
-impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self {
-            x,
-            y,
-            z
-        }
-    }
-    
-    pub fn scale(&self, scale: f32) -> Self {
-        Self::new(self.x * scale, self.y * scale, self.z * self.z)
-    }
-}
 
 /// A pointer at a vertex
 pub type VertexIndex = u32;
@@ -43,8 +24,8 @@ pub fn sort_vertex_group_radial(vertices: &Vec<Vertex>, vert_group: &mut VertexG
     vert_group.sort_by(|a, b| {
         let pos_a = &vertices[a.vert_index as usize];
         let pos_b = &vertices[b.vert_index as usize];
-        let angle_a = f32::atan2(pos_a.y, pos_a.z);
-        let angle_b = f32::atan2(pos_b.y, pos_b.z);
+        let angle_a = f32::atan2(pos_a[1], pos_a[2]);
+        let angle_b = f32::atan2(pos_b[1], pos_b[2]);
         
         if angle_a > angle_b {
             std::cmp::Ordering::Less
@@ -81,11 +62,6 @@ pub fn offset_vert_group(group: &VertexGroup, offset: u32) -> VertexGroup {
     group.iter().map(|x| VertWeight::new(x.vert_index + offset, x.weight)).collect()
 }
 
-/// Returns the squared distance between two points
-pub fn dist_squared(p1: &Vertex, p2: &Vertex) -> f32 {
-    f32::powi(p1.x - p2.x, 2) + f32::powi(p1.y - p2.y, 2) + f32::powi(p1.z - p2.z, 2)
-}
-
 
 impl Mesh {
     /// Joins another mesh into this mesh by appending vertices and offsetting
@@ -117,30 +93,29 @@ impl Mesh {
         
         vert_offset
     }
+    
+    pub fn scale(&mut self, scale: Vec3) {
+        println!("scale: {:?}", scale);
+        for mut vert in self.vertices.iter_mut() {
+            *vert *= scale;
+        }
+    }
 
     
     /// Calculates the dimensions of the track. Returns the minimum and maximum bounds
     /// and the length/width/height
     pub fn calc_bounds(&self) -> (Vec3, Vec3, Vec3) {
-        let mut min = Vec3::new(f32::INFINITY, f32::INFINITY, f32::INFINITY);
-        let mut max = Vec3::new(f32::NEG_INFINITY, f32::NEG_INFINITY, f32::NEG_INFINITY);
+        let mut min_vec = Vec3::new(f32::INFINITY, f32::INFINITY, f32::INFINITY);
+        let mut max_vec = Vec3::new(f32::NEG_INFINITY, f32::NEG_INFINITY, f32::NEG_INFINITY);
         
         for vert in self.vertices.iter() {
-            min.x = f32::min(vert.x, min.x);
-            min.y = f32::min(vert.y, min.y);
-            min.z = f32::min(vert.z, min.z);
-            max.x = f32::max(vert.x, max.x);
-            max.y = f32::max(vert.y, max.y);
-            max.z = f32::max(vert.z, max.z);
+            min_vec = min_vec.min(*vert);
+            max_vec = max_vec.max(*vert);
         };
         
-        let dim = Vec3::new(
-            max.x - min.x,
-            max.y - min.y,
-            max.z - min.z,
-        );
+        let dim = max_vec - min_vec;
         
-        (min, max, dim)
+        (min_vec, max_vec, dim)
     }
     
     /// Merge nearby vertices. Note this is O(n^2) operation.
@@ -156,7 +131,7 @@ impl Mesh {
         for (index, vert) in self.vertices.iter().enumerate() {
             let mut merged = false;
             for (existing_index, existing_vert) in new_vertices.iter().enumerate() {
-                if dist_squared(vert, existing_vert) < sq_error {
+                if (*vert - *existing_vert).length_squared() < sq_error {
                     merged = true;
                     index_remap.insert(index as VertexIndex, existing_index as VertexIndex); //.expect_none("Overwriting vert");
                     break;
@@ -197,10 +172,8 @@ impl Mesh {
     
     /// Move all the vertices by the specified vector
     pub fn linear_offset(&mut self, offset: Vec3) {
-        for vert in self.vertices.iter_mut() {
-            vert.x += offset.x;
-            vert.y += offset.y;
-            vert.z += offset.z;
+        for mut vert in self.vertices.iter_mut() {
+            *vert += offset;
         }
     }
     
@@ -209,37 +182,27 @@ impl Mesh {
     /// and the y axis as the angle
     pub fn bend(&mut self, amount: f32) {
         for vert in self.vertices.iter_mut() {
-            let angle = vert.y * amount;
+            let angle = vert[1] * amount;
             
-            let radius = vert.z;
+            let radius = vert[2];
             let (s, c) = angle.sin_cos();
             
-            vert.y = s * radius;
-            vert.z = c * radius;
+            vert[1] = s * radius;
+            vert[2] = c * radius;
         }
     }
     
     pub fn calc_face_normal(&self, face: &Face) -> Vec3 {
-        let vert0 = &self.vertices[face.0 as usize];
-        let vert1 = &self.vertices[face.1 as usize];
-        let vert2 = &self.vertices[face.2 as usize];
+        let vert0 = self.vertices[face.0 as usize];
+        let vert1 = self.vertices[face.1 as usize];
+        let vert2 = self.vertices[face.2 as usize];
         
-        let v1 = Vec3 {
-            x: vert0.x - vert1.x,
-            y: vert0.y - vert1.y,
-            z: vert0.z - vert1.z,
-        };
-        let v2 = Vec3 {
-            x: vert0.x - vert2.x,
-            y: vert0.y - vert2.y,
-            z: vert0.z - vert2.z,
-        };
+        let v1 = vert0 - vert1;
+        let v2 = vert0 - vert2;
         
-        Vec3 {
-            x: v1.y * v2.z,
-            y: v1.x * v2.z,
-            z: v1.x * v2.y,
-        }
+        let normal = v1.cross(v2);
+        
+        normal
     }
 }
 
