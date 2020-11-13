@@ -10,3 +10,7 @@ endif
 
 site:
 	cd src; wasm-pack build $(WASM_PACK_FLAGS) site
+	mkdir -p bin
+	cp static/* bin
+	cp src/site/pkg/site.js bin
+	cp src/site/pkg/site_bg.wasm bin
