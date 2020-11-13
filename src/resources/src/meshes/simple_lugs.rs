@@ -1,5 +1,4 @@
-
-use meshtools::mesh::{Mesh, Vertex, Face, VertWeight};
+use meshtools::mesh::{Face, Mesh, VertWeight, Vertex};
 
 pub fn get_mesh() -> Mesh {
     Mesh {
@@ -23,7 +22,7 @@ pub fn get_mesh() -> Mesh {
             Vertex::new(-2.0, -2.0, -5.0),
             Vertex::new(-2.0, 2.0, -5.0),
             Vertex::new(2.0, -2.0, -5.0),
-            Vertex::new(2.0, 2.0, -5.0)
+            Vertex::new(2.0, 2.0, -5.0),
         ],
         faces: vec![
             Face(10, 9, 15),
@@ -51,29 +50,29 @@ pub fn get_mesh() -> Mesh {
             Face(17, 19, 18),
             Face(16, 18, 14),
             Face(17, 16, 12),
-            Face(19, 17, 13)
+            Face(19, 17, 13),
         ],
         vertex_groups: vec![
-
             (
-                "edge_left".to_string(), 
+                "edge_left".to_string(),
                 vec![
                     VertWeight::new(0, 1.0),
                     VertWeight::new(2, 1.0),
                     VertWeight::new(4, 1.0),
-                    VertWeight::new(5, 1.0)
-                ]
+                    VertWeight::new(5, 1.0),
+                ],
             ),
-
             (
-                "edge_right".to_string(), 
+                "edge_right".to_string(),
                 vec![
                     VertWeight::new(1, 1.0),
                     VertWeight::new(3, 1.0),
                     VertWeight::new(8, 1.0),
-                    VertWeight::new(9, 1.0)
-                ]
+                    VertWeight::new(9, 1.0),
+                ],
             ),
-        ].into_iter().collect()
-    }  
+        ]
+        .into_iter()
+        .collect(),
+    }
 }

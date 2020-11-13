@@ -1,14 +1,12 @@
 /// Tools are things that take in one mesh and output another new mesh.
-use super::mesh::{Mesh, Face, VertexGroup, VertWeight, Vertex};
+use super::mesh::{Face, Mesh, VertWeight, Vertex, VertexGroup};
 use glam::Vec3;
 
 use std::collections::HashMap;
 
-
-
 /// Returns a new mesh with lots of duplicates spaced by the specified
 /// distance
-pub fn make_array(mesh: &Mesh, count:u32, offset: Vec3) -> Mesh {
+pub fn make_array(mesh: &Mesh, count: u32, offset: Vec3) -> Mesh {
     let mut array = Mesh::default();
     for i in 0..count {
         let mut next = mesh.clone();
@@ -18,107 +16,106 @@ pub fn make_array(mesh: &Mesh, count:u32, offset: Vec3) -> Mesh {
     array
 }
 
-
-
-pub fn generate_vertex_bridge(mesh1: &Mesh, mesh2: &Mesh, vertex_group_1: &VertexGroup, vertex_group_2: &VertexGroup) -> Mesh {
+pub fn generate_vertex_bridge(
+    mesh1: &Mesh,
+    mesh2: &Mesh,
+    vertex_group_1: &VertexGroup,
+    vertex_group_2: &VertexGroup,
+) -> Mesh {
     let mut verts = Vec::with_capacity(vertex_group_1.len() + vertex_group_2.len());
-    
-    
+
     let loop_1 = {
         let mut l = VertexGroup::new();
         for vert in vertex_group_1.iter() {
-            l.push(VertWeight{
-                vert_index: verts.len() as u32, 
-                weight: vert.weight
+            l.push(VertWeight {
+                vert_index: verts.len() as u32,
+                weight: vert.weight,
             });
             verts.push(mesh1.vertices[vert.vert_index as usize].clone());
         }
         l
     };
-      
+
     let loop_2 = {
         let mut l = VertexGroup::new();
-        
+
         for vert in vertex_group_2.iter() {
             l.push(VertWeight {
-                vert_index: verts.len() as u32, 
-                weight: vert.weight
+                vert_index: verts.len() as u32,
+                weight: vert.weight,
             });
             verts.push(mesh2.vertices[vert.vert_index as usize].clone());
         }
         l
     };
-    
+
     let mut faces = Vec::new();
-    
+
     let mut p1 = 1;
     let mut p2 = 1;
-    
-    
+
     loop {
         let vert_1 = verts[loop_1[p1].vert_index as usize];
         let vert_2 = verts[loop_2[p2].vert_index as usize];
-        
+
         let vert_2_next = verts[loop_2[p2 + 1].vert_index as usize];
 
         let dist_here = (vert_1 - vert_2).length_squared();
         let dist_next = (vert_1 - vert_2_next).length_squared();
-        
 
         if dist_here < dist_next {
             faces.push(Face(
-                loop_1[p1-1].vert_index,
+                loop_1[p1 - 1].vert_index,
                 loop_1[p1].vert_index,
-                loop_2[p2-1].vert_index
+                loop_2[p2 - 1].vert_index,
             ));
             p1 += 1;
-            
         } else {
             faces.push(Face(
-                loop_1[p1-1].vert_index,
+                loop_1[p1 - 1].vert_index,
                 loop_2[p2].vert_index,
-                loop_2[p2-1].vert_index
+                loop_2[p2 - 1].vert_index,
             ));
             p2 += 1;
         }
-        
+
         if p1 == loop_1.len() - 1 {
             faces.push(Face(
-                loop_1[p1-1].vert_index,
+                loop_1[p1 - 1].vert_index,
                 loop_1[p1].vert_index,
-                loop_2[p2-1].vert_index
+                loop_2[p2 - 1].vert_index,
             ));
-            
+
             while p2 < loop_2.len() {
                 faces.push(Face(
                     loop_1[p1].vert_index,
                     loop_2[p2].vert_index,
-                    loop_2[p2-1].vert_index
+                    loop_2[p2 - 1].vert_index,
                 ));
                 p2 += 1;
             }
-            break
+            break;
         }
-        
+
         if p2 == loop_2.len() - 1 {
             faces.push(Face(
-                loop_1[p1-1].vert_index,
+                loop_1[p1 - 1].vert_index,
                 loop_2[p2].vert_index,
-                loop_2[p2-1].vert_index
+                loop_2[p2 - 1].vert_index,
             ));
-            
+
             while p1 < loop_1.len() {
                 faces.push(Face(
                     loop_1[p1 - 1].vert_index,
                     loop_1[p1].vert_index,
-                    loop_2[p2].vert_index
+                    loop_2[p2].vert_index,
                 ));
                 p1 += 1;
             }
-            break
+            break;
         }
     }
-    
+
     Mesh {
         vertices: verts,
         faces: faces,
@@ -126,14 +123,13 @@ pub fn generate_vertex_bridge(mesh1: &Mesh, mesh2: &Mesh, vertex_group_1: &Verte
     }
 }
 
-
-mod tests{
+mod tests {
     #[test]
     fn test_bridge_simple() {
-        use std::fs;
         use super::*;
         use std::collections::HashMap;
-        
+        use std::fs;
+
         let mesh1 = Mesh {
             vertices: vec![
                 Vertex::new(0.0, 0.0, 0.0),
@@ -145,22 +141,22 @@ mod tests{
                 Vertex::new(0.6, 0.0, 0.0),
             ],
             faces: vec![],
-            vertex_groups: vec![
-                (
-                    "edge_right".to_string(), 
-                    vec![
-                        VertWeight::new(0, 1.0),
-                        VertWeight::new(1, 1.0),
-                        VertWeight::new(2, 1.0),
-                        VertWeight::new(3, 1.0),
-                        VertWeight::new(4, 1.0),
-                        VertWeight::new(5, 1.0),
-                        VertWeight::new(6, 1.0),
-                    ]
-                )
-            ].into_iter().collect()
+            vertex_groups: vec![(
+                "edge_right".to_string(),
+                vec![
+                    VertWeight::new(0, 1.0),
+                    VertWeight::new(1, 1.0),
+                    VertWeight::new(2, 1.0),
+                    VertWeight::new(3, 1.0),
+                    VertWeight::new(4, 1.0),
+                    VertWeight::new(5, 1.0),
+                    VertWeight::new(6, 1.0),
+                ],
+            )]
+            .into_iter()
+            .collect(),
         };
-        
+
         let mesh2 = Mesh {
             vertices: vec![
                 Vertex::new(0.0, 0.0, 1.0),
@@ -172,41 +168,39 @@ mod tests{
                 Vertex::new(0.6, 0.0, 1.0),
             ],
             faces: vec![],
-            vertex_groups: vec![
-                (
-                    "edge_right".to_string(), 
-                    vec![
-                        VertWeight::new(0, 1.0),
-                        VertWeight::new(1, 1.0),
-                        VertWeight::new(2, 1.0),
-                        VertWeight::new(3, 1.0),
-                        VertWeight::new(4, 1.0),
-                        VertWeight::new(5, 1.0),
-                        VertWeight::new(6, 1.0),
-                    ]
-                )
-            ].into_iter().collect()
+            vertex_groups: vec![(
+                "edge_right".to_string(),
+                vec![
+                    VertWeight::new(0, 1.0),
+                    VertWeight::new(1, 1.0),
+                    VertWeight::new(2, 1.0),
+                    VertWeight::new(3, 1.0),
+                    VertWeight::new(4, 1.0),
+                    VertWeight::new(5, 1.0),
+                    VertWeight::new(6, 1.0),
+                ],
+            )]
+            .into_iter()
+            .collect(),
         };
-        
-        
+
         let bridge = generate_vertex_bridge(
-            &mesh1, 
+            &mesh1,
             &mesh2,
             mesh1.vertex_groups.get("edge_right").as_ref().unwrap(),
-            mesh2.vertex_groups.get("edge_right").as_ref().unwrap()
+            mesh2.vertex_groups.get("edge_right").as_ref().unwrap(),
         );
-        
+
         let data = crate::stl::generate_binary_stl(&bridge);
         fs::write("/tmp/foo.stl", data).expect("Unable to write file");
     }
-    
-    
+
     #[test]
     fn test_bridge_triangle_1() {
-        use std::fs;
         use super::*;
         use std::collections::HashMap;
-        
+        use std::fs;
+
         let mesh1 = Mesh {
             vertices: vec![
                 Vertex::new(0.0, 0.0, 0.0),
@@ -214,18 +208,18 @@ mod tests{
                 Vertex::new(2.0, 0.0, 0.0),
             ],
             faces: vec![],
-            vertex_groups: vec![
-                (
-                    "edge_right".to_string(), 
-                    vec![
-                        VertWeight::new(0, 1.0),
-                        VertWeight::new(1, 1.0),
-                        VertWeight::new(2, 1.0),
-                    ]
-                )
-            ].into_iter().collect()
+            vertex_groups: vec![(
+                "edge_right".to_string(),
+                vec![
+                    VertWeight::new(0, 1.0),
+                    VertWeight::new(1, 1.0),
+                    VertWeight::new(2, 1.0),
+                ],
+            )]
+            .into_iter()
+            .collect(),
         };
-        
+
         let mesh2 = Mesh {
             vertices: vec![
                 Vertex::new(0.0, 0.0, 1.0),
@@ -233,26 +227,25 @@ mod tests{
                 Vertex::new(2.0, 0.0, 1.0),
             ],
             faces: vec![],
-            vertex_groups: vec![
-                (
-                    "edge_right".to_string(), 
-                    vec![
-                        VertWeight::new(0, 1.0),
-                        VertWeight::new(1, 1.0),
-                        VertWeight::new(2, 1.0),
-                    ]
-                )
-            ].into_iter().collect()
+            vertex_groups: vec![(
+                "edge_right".to_string(),
+                vec![
+                    VertWeight::new(0, 1.0),
+                    VertWeight::new(1, 1.0),
+                    VertWeight::new(2, 1.0),
+                ],
+            )]
+            .into_iter()
+            .collect(),
         };
-        
-        
+
         let bridge = generate_vertex_bridge(
-            &mesh1, 
+            &mesh1,
             &mesh2,
             mesh1.vertex_groups.get("edge_right").as_ref().unwrap(),
-            mesh2.vertex_groups.get("edge_right").as_ref().unwrap()
+            mesh2.vertex_groups.get("edge_right").as_ref().unwrap(),
         );
-        
+
         let data = crate::stl::generate_binary_stl(&bridge);
         fs::write("/tmp/simple.stl", data).expect("Unable to write file");
     }

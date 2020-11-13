@@ -1,4 +1,3 @@
-
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
@@ -10,26 +9,24 @@ extern "C" {
     fn log(s: &str);
 }
 
+pub mod background;
+pub mod camera;
 pub mod geometry;
 pub mod shader;
-pub mod shader_stl;
 pub mod shader_background;
+pub mod shader_stl;
 pub mod stl;
-pub mod background;
 pub mod texture;
 pub mod textures;
-pub mod camera;
 
-use shader_stl::ShaderStl;
-use shader_background::ShaderBackground;
-use stl::Stl;
 use background::Background;
-use textures::StaticTextures;
 use camera::Camera;
+use shader_background::ShaderBackground;
+use shader_stl::ShaderStl;
+use stl::Stl;
+use textures::StaticTextures;
 
-
-
-pub struct Renderer{
+pub struct Renderer {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
     stls: Vec<Stl>,
@@ -37,13 +34,12 @@ pub struct Renderer{
     shader_stl: ShaderStl,
     shader_background: ShaderBackground,
     camera: Camera,
-    
+
     pub resolution: (u32, u32),
-    
+
     dirty: bool,
     last_render_time: f32,
 }
-
 
 #[derive(Debug)]
 pub enum RendererError {
@@ -70,10 +66,9 @@ impl From<shader::ShaderError> for RendererError {
     }
 }
 
-
 impl Renderer {
     pub fn new(canvas: HtmlCanvasElement) -> Result<Self, RendererError> {
-        let gl = get_gl_context(&canvas).map_err(|_| {RendererError::NoContext})?;
+        let gl = get_gl_context(&canvas).map_err(|_| RendererError::NoContext)?;
 
         gl.clear_color(0.0, 0.0, 0.0, 1.0);
         gl.enable(WebGl2RenderingContext::DEPTH_TEST);
@@ -82,9 +77,8 @@ impl Renderer {
         );
 
         if gl.is_null() {
-            return Err(RendererError::NoGl)
+            return Err(RendererError::NoGl);
         }
-        
 
         let background = Background::new(&gl)?;
         let mut shader_stl = ShaderStl::new(&gl)?;
@@ -93,7 +87,7 @@ impl Renderer {
 
         shader_stl.image_matcap = Some(textures.stl_matcap.clone());
         shader_background.image_matcap = Some(textures.stl_matcap.clone());
-        
+
         let camera = Camera::new();
 
         Ok(Self {
@@ -106,11 +100,10 @@ impl Renderer {
             camera,
             resolution: (100, 100),
             dirty: true,
-            last_render_time: 0.0
+            last_render_time: 0.0,
         })
     }
-    
-    
+
     pub fn add_stl(&mut self, stl_data: &[u8]) -> Result<(), RendererError> {
         self.stls.push(Stl::new(&self.gl, &stl_data)?);
         Ok(())
@@ -136,7 +129,7 @@ impl Renderer {
             self.resolution = (client_width, client_height);
 
             self.dirty = true;
-            
+
             log(&format!("Resized to {}:{}", client_width, client_height));
         }
     }
@@ -147,13 +140,12 @@ impl Renderer {
         self.check_resize();
         let now = window().unwrap().performance().unwrap().now();
         let time = (now / 1000.0) as f32;
-        
-        
+
         let time_since_render = time - self.last_render_time;
         if time_since_render > 0.2 {
             self.dirty = true;
         }
-        
+
         if self.dirty {
             self.render();
             self.dirty = false;
@@ -161,29 +153,29 @@ impl Renderer {
         }
     }
 
-    
     /// Perform a render immediately.
     fn render(&mut self) {
         self.gl.clear(
             WebGl2RenderingContext::COLOR_BUFFER_BIT | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
         );
-        
+
         let (world_to_camera, camera_to_screen) = self.camera.to_matrices();
-        
+
         {
             // Render the background
-            self.shader_background.setup(&self.gl, world_to_camera, camera_to_screen);
+            self.shader_background
+                .setup(&self.gl, world_to_camera, camera_to_screen);
             self.background.render(&self.gl, &self.shader_background);
         }
-        
+
         {
             // Render the models
-            self.shader_stl.setup(&self.gl, world_to_camera, camera_to_screen);
+            self.shader_stl
+                .setup(&self.gl, world_to_camera, camera_to_screen);
             for stl in self.stls.iter() {
                 stl.render(&self.gl, &self.shader_stl);
             }
         }
-        
     }
 
     /// Orbit the view
@@ -193,7 +185,6 @@ impl Renderer {
         self.camera.elevation = f32::min(f32::max(self.camera.elevation, -1.4), 1.4);
         self.dirty = true;
     }
-
 }
 
 fn get_gl_context(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, JsValue> {
