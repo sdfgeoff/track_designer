@@ -6,9 +6,9 @@ use wasm_bindgen::prelude::{wasm_bindgen, Closure};
 use wasm_bindgen::JsCast;
 use web_sys::{window, Event, HtmlCanvasElement, KeyEvent, MouseEvent};
 
+
+mod renderer;
 mod app;
-mod quad;
-mod texture;
 
 // Pull in the console.log function so we can debug things more easily
 #[wasm_bindgen]
@@ -78,33 +78,40 @@ impl Core {
 
         {
             // Mouse events
-            let anim_app = self.app.clone();
+            let anim_app1 = self.app.clone();
+            let anim_app2 = self.app.clone();
+            let anim_app3 = self.app.clone();
 
-            let callback = Closure::wrap(Box::new(move |event: MouseEvent| {
-                anim_app.borrow_mut().mouse_event(event);
+            let mouse_move = Closure::wrap(Box::new(move |event: MouseEvent| {
+                anim_app1.borrow_mut().mouse_move(event);
+            }) as Box<dyn FnMut(_)>);
+            let mouse_up = Closure::wrap(Box::new(move |event: MouseEvent| {
+                anim_app2.borrow_mut().mouse_up(event);
+            }) as Box<dyn FnMut(_)>);
+            let mouse_down = Closure::wrap(Box::new(move |event: MouseEvent| {
+                anim_app3.borrow_mut().mouse_down(event);
             }) as Box<dyn FnMut(_)>);
 
-            let callback_ref = callback.as_ref().unchecked_ref();
+            let mouse_move_ref = mouse_move.as_ref().unchecked_ref();
+            let mouse_up_ref = mouse_up.as_ref().unchecked_ref();
+            let mouse_down_ref = mouse_down.as_ref().unchecked_ref();
+            
             self.canvas
-                .add_event_listener_with_callback("mousedown", callback_ref)
+                .add_event_listener_with_callback("mousedown", mouse_down_ref)
                 .unwrap();
             self.canvas
-                .add_event_listener_with_callback("mouseup", callback_ref)
+                .add_event_listener_with_callback("mouseup", mouse_up_ref)
                 .unwrap();
             self.canvas
-                .add_event_listener_with_callback("mousemove", callback_ref)
+                .add_event_listener_with_callback("mousemove", mouse_move_ref)
                 .unwrap();
             self.canvas
-                .add_event_listener_with_callback("mouseenter", callback_ref)
-                .unwrap();
-            self.canvas
-                .add_event_listener_with_callback("mouseleave", callback_ref)
-                .unwrap();
-            self.canvas
-                .add_event_listener_with_callback("mouseover", callback_ref)
+                .add_event_listener_with_callback("mouseleave", mouse_up_ref)
                 .unwrap();
 
-            callback.forget();
+            mouse_move.forget();
+            mouse_up.forget();
+            mouse_down.forget();
         }
 
         {

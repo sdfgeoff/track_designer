@@ -123,10 +123,10 @@ pub fn generate_track(track_description: TrackDescription, shape: TrackShapeDesc
         inner_surface.vertex_groups.get("edge_right").as_ref().expect("Track inner Surface missing edge_left vertex group")
     );
     let track_sidewall_left = generate_vertex_bridge(
-        &outer_surface,
         &inner_surface,
-        outer_surface.vertex_groups.get("edge_left").as_ref().expect("Track outer Surface missing edge_left vertex group"),
-        inner_surface.vertex_groups.get("edge_left").as_ref().expect("Track inner Surface missing edge_left vertex group")
+        &outer_surface,
+        inner_surface.vertex_groups.get("edge_left").as_ref().expect("Track inner Surface missing edge_left vertex group"),
+        outer_surface.vertex_groups.get("edge_left").as_ref().expect("Track outer Surface missing edge_left vertex group")
     );
     
     let mut complete_track = Mesh::default();

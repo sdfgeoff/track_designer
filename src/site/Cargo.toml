@@ -10,6 +10,10 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 wasm-bindgen="0.2.63"
 js-sys="0.3.40"
+glam="0.10.0"
+tracktool={path="../tracktool"}
+meshtools={path="../meshtools"}
+track_outer_surfaces={path="../track_outer_surfaces"}
 
 [dependencies.web-sys]
 version = "0.3.4"
