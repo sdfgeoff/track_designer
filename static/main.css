@@ -1,25 +1,27 @@
 body {
     margin: 0;
     padding: 0;
+    background: 
 }
 
-canvas {
+#track_design_app {
     height: 100vh;
     width: 100vw;
     margin: 0;
     padding: 0;
-    background: grey url("click_icon.svg") no-repeat center;
-    background-size: 100px 100px;
-}
-
-canvas.loading {
-    background: black url("loading.gif") no-repeat center;
-}
-
-canvas.loaded {
     background: black;
 }
 
-canvas.error {
+#track_design_app .loading {
+    background: black url("loading.gif") no-repeat center;
+    background-size: 100px 100px;
+}
+
+#track_design_app .loaded {
+    background: black;
+}
+
+#track_design_app .error {
     background: black url("error.svg") no-repeat center;
+    background-size: 100px 100px;
 }

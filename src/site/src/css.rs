@@ -8,5 +8,5 @@ pub fn inject_css(css: &str) {
 
     let style = document.create_element("style").unwrap();
     style.set_inner_html(css);
-    head.append_child(&style);
+    head.append_child(&style).unwrap();
 }

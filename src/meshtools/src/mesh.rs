@@ -94,8 +94,7 @@ impl Mesh {
     }
 
     pub fn scale(&mut self, scale: Vec3) {
-        println!("scale: {:?}", scale);
-        for mut vert in self.vertices.iter_mut() {
+        for vert in self.vertices.iter_mut() {
             *vert *= scale;
         }
     }
@@ -175,7 +174,7 @@ impl Mesh {
 
     /// Move all the vertices by the specified vector
     pub fn linear_offset(&mut self, offset: Vec3) {
-        for mut vert in self.vertices.iter_mut() {
+        for vert in self.vertices.iter_mut() {
             *vert += offset;
         }
     }

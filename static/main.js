@@ -1,36 +1,31 @@
 "use strict"
 
-function load(canvas, module_path, options) {
+function load(area, module_path) {
     console.log("Loading", module_path)
-    canvas.className = "loading"
+    area.className = "loading"
     
     import(module_path)
     .then((module) => {
         module.default().then(function(obj){
-            let core = new module.Core(canvas.id, options)
+            let core = new module.Core(area)
             core.start()
-            canvas.core = core
+            area.core = core
         }).catch(function(e){
             console.error("Failed to init module:", e)
-            canvas.className = "error"
+            area.className = "error"
         })
     }).catch(function(e) {
         console.error("Failed to load:", e)
-        canvas.className = "error"
+        area.className = "error"
     });
 }
 
-function setup_canvas() {
-    const canvases = document.querySelectorAll("canvas");
-    console.log(canvases)
-    for (let canvas of canvases) {
-        let options = canvas.getAttribute("options") || ""
-        let id = canvas.id.split("-")[0] // So we can have multiple canvas' with the same app and different options
-        let module_path = './'+ id +'.js' // Path to WASM JS bindings
-        load(canvas, module_path, options)
-    }
+function setup_app() {
+    let area = document.getElementById("track_design_app");
+    const module_path = './site.js' // Path to WASM JS bindings
+    load(area, module_path)
 }
-window.onload = setup_canvas
+window.onload = setup_app
 
 
 

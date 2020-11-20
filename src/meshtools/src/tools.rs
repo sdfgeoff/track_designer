@@ -1,5 +1,5 @@
 /// Tools are things that take in one mesh and output another new mesh.
-use super::mesh::{Face, Mesh, VertWeight, Vertex, VertexGroup};
+use super::mesh::{Face, Mesh, VertWeight, VertexGroup};
 use glam::Vec3;
 
 use std::collections::HashMap;
