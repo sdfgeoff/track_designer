@@ -40,6 +40,8 @@ features = [
     "MouseEvent",
     'Performance',
     "SvgElement",
+    "SvgGraphicsElement",
+    "SvgMatrix",
     "WebGl2RenderingContext",
     "WebGlShader",
     "WebGlTexture",

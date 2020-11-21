@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
+use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext, MouseEvent};
 
 // Pull in the console.log function so we can debug things more easily
 #[wasm_bindgen]
@@ -36,6 +36,7 @@ pub struct Renderer {
     camera: Camera,
 
     pub resolution: (u32, u32),
+    click_location: Option<(i32, i32)>,
 
     dirty: bool,
     last_render_time: f32,
@@ -98,6 +99,7 @@ impl Renderer {
             shader_stl,
             shader_background,
             camera,
+            click_location: None,
             resolution: (100, 100),
             dirty: true,
             last_render_time: 0.0,
@@ -185,6 +187,34 @@ impl Renderer {
         self.camera.elevation = f32::min(f32::max(self.camera.elevation, -1.4), 1.4);
         self.dirty = true;
     }
+    
+    
+    
+    pub fn mouse_move(&mut self, event: MouseEvent) {
+        const DRAG_SENSITIVITY: f32 = 5.0;
+        match self.click_location {
+            Some(location) => {
+                let new = (event.client_x(), event.client_y());
+                let delta = (location.0 - new.0, location.1 - new.1);
+                self.click_location = Some(new);
+
+                let percentage_x =
+                    (delta.0 as f32) / (self.resolution.0 as f32) * DRAG_SENSITIVITY;
+                let percentage_y =
+                    (delta.1 as f32) / (self.resolution.0 as f32) * DRAG_SENSITIVITY;
+
+                self.drag_view((percentage_x, -percentage_y));
+            }
+            None => {}
+        }
+    }
+    pub fn mouse_down(&mut self, event: MouseEvent) {
+        self.click_location = Some((event.client_x(), event.client_y()));
+    }
+    pub fn mouse_up(&mut self, _event: MouseEvent) {
+        self.click_location = None;
+    }
+    
 }
 
 fn get_gl_context(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, JsValue> {
