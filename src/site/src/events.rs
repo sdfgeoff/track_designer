@@ -1,3 +1,6 @@
+//! Events represent operations on state and are generated from multiple
+//! sources. Events are emitted to allow communication between separate
+//! parts of the program
 use super::schematic::{TrackPathSegmentDrawing, WheelDrawing};
 use tracktool::track_path::{TrackPathSegment, WheelDescription};
 use web_sys::MouseEvent;

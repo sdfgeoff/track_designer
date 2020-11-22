@@ -1,3 +1,6 @@
+//! Responsible for drawing and manipulating wheels.
+
+
 use super::handle::{set_drag_action, Action};
 use super::svg::create_svg_element;
 
@@ -11,12 +14,20 @@ const RADIUS_HANDLE_SCALE_FACTOR: f32 = 1.0 - RADIUS_HANDLE_SIZE / 2.0;
 
 use tracktool::track_path::WheelDescription;
 
+/// Displays a wheel and allows a user to manipulate it's position
+/// and radius
 #[derive(Debug)]
 pub struct WheelDrawing {
+    /// The outline
     main_circle: Element,
+    
+    /// The centroid
     center_handle: Element,
+    
+    /// The thing the user clicks on to adjust the radius
     radius_handle: Element,
 }
+
 
 impl WheelDrawing {
     pub fn new(svg: &SvgElement) -> Result<Self, JsValue> {
@@ -51,39 +62,44 @@ impl WheelDrawing {
         })
     }
 
+    /// Check if the specified SVG element is part of this drawing.
     pub fn contains_element(&self, elem: &Element) -> bool {
         elem == &self.main_circle || elem == &self.center_handle || elem == &self.radius_handle
     }
 
+    /// Adjust the elements to match the specified wheel
     pub fn update_from_wheel_description(
         &mut self,
         wheel: &WheelDescription,
     ) -> Result<(), JsValue> {
         let radius = wheel.radius();
         self.main_circle
-            .set_attribute("cx", &format!("{}", wheel.position[0]))?;
+            .set_attribute("cx", &wheel.position[0].to_string())?;
         self.main_circle
-            .set_attribute("cy", &format!("{}", wheel.position[1]))?;
+            .set_attribute("cy", &wheel.position[1].to_string())?;
         self.main_circle
-            .set_attribute("r", &format!("{}", radius))?;
+            .set_attribute("r", &radius.to_string())?;
 
         self.center_handle
-            .set_attribute("cx", &format!("{}", wheel.position[0]))?;
+            .set_attribute("cx", &wheel.position[0].to_string())?;
         self.center_handle
-            .set_attribute("cy", &format!("{}", wheel.position[1]))?;
+            .set_attribute("cy", &wheel.position[1].to_string())?;
 
         self.radius_handle
-            .set_attribute("cx", &format!("{}", wheel.position[0]))?;
+            .set_attribute("cx", &wheel.position[0].to_string())?;
         self.radius_handle
-            .set_attribute("cy", &format!("{}", wheel.position[1]))?;
+            .set_attribute("cy", &wheel.position[1].to_string())?;
         self.radius_handle
-            .set_attribute("r", &format!("{}", radius * RADIUS_HANDLE_SCALE_FACTOR))?;
+            .set_attribute("r", &(radius * RADIUS_HANDLE_SCALE_FACTOR).to_string())?;
         self.radius_handle
-            .set_attribute("stroke-width", &format!("{}", radius * RADIUS_HANDLE_SIZE))?;
+            .set_attribute("stroke-width", &(radius * RADIUS_HANDLE_SIZE).to_string())?;
 
         Ok(())
     }
 
+    /// Remove all the elements from the SVG. After this point, calling
+    /// functions on this struct is undefined.
+    // TODO: protect from undefined behaviour!!!!
     pub fn delete(&self) -> Result<(), JsValue> {
         self.main_circle
             .parent_node()
@@ -93,9 +109,14 @@ impl WheelDrawing {
             .parent_node()
             .expect("Not in drawing!!!")
             .remove_child(&self.center_handle)?;
+        self.radius_handle
+            .parent_node()
+            .expect("Not in drawing!!!")
+            .remove_child(&self.center_handle)?;
         Ok(())
     }
 
+    /// Returns where the axle of the wheel should be.
     pub fn get_center_handle_position(&self) -> Result<glam::Vec2, JsValue> {
         Ok(Vec2::new(
             self.center_handle

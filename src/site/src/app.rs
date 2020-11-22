@@ -163,10 +163,9 @@ impl App {
                         .mouse_move(&self.state.layout.schematic_svg, event);
 
                     if let Some(elem) = &self.state.schematic.selected_element {
-                        if let Some(id) = schematic::get_drawing_id_from_element(
-                            &self.state.wheel_drawings,
-                            elem,
-                        ) {
+                        if let Some(id) =
+                            schematic::get_drawing_id_from_element(&self.state.wheel_drawings, elem)
+                        {
                             let drawing = self.state.wheel_drawings.get(id).expect("Invalid Id!!");
                             let wheel_desc = self
                                 .state

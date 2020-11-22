@@ -1,10 +1,18 @@
-// Rules: No types in types - only options of types and vecs of types
-
+//! Entire program state
 use super::layout::Layout;
 use super::schematic::{Schematic, TrackPathSegmentDrawing, WheelDrawing};
 use super::visualizer3d::Visualizer3d;
 use tracktool::track_path::{TrackPathSegment, WheelDescription};
 
+/// The current state of the program is stored in this struct.
+/// This includes fundamental data (data that is needed to represent
+/// the track system) as well as derived data (essentially a cache of
+/// fundamental data) and runtime data (UI elements.
+///
+/// When saving/loading, only part of this struct needs to be saved/loaded.
+/// This is an area of possible improvement as it would be nice to be able
+/// to derive Serialize on this whole struct.
+// TODO: Consider splitting fundamental data out? 
 pub struct State {
     // Fundamental Data
     // This data is needed to recreate the setup, and should be saved

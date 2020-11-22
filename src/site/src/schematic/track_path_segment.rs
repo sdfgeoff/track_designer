@@ -1,9 +1,13 @@
+//! Responsible for drawing a track as it runs around/between wheels
 use super::svg::{create_svg_element, polar_to_cartesian};
 use wasm_bindgen::JsValue;
 use web_sys::{Element, SvgElement};
 
 use tracktool::track_path::TrackPathSegment;
 
+/// A single track path segment represents one wheel and the section of 
+/// track that joins onto the next wheel. As such it is an arc and a 
+/// line.
 #[derive(Debug)]
 pub struct TrackPathSegmentDrawing {
     line: Element,
@@ -27,6 +31,7 @@ impl TrackPathSegmentDrawing {
         Ok(Self { line, arc })
     }
 
+    /// Modifies the drawing to match the specified segment
     pub fn update_from_track_path_segment(
         &mut self,
         segment: &TrackPathSegment,
@@ -61,6 +66,9 @@ impl TrackPathSegmentDrawing {
         Ok(())
     }
 
+    /// Remove all the elements from the SVG. After this point, calling
+    /// functions on this struct is undefined.
+    // TODO: protect from undefined behaviour!!!!
     pub fn delete(&self) -> Result<(), JsValue> {
         self.line
             .parent_node()

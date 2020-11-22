@@ -1,3 +1,6 @@
+//! Provides a GUI interface to the tracktool library. This takes the 
+//! form of a fully-rust WASM web-app
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -6,15 +9,14 @@ use wasm_bindgen::prelude::{wasm_bindgen, Closure};
 use wasm_bindgen::JsCast;
 use web_sys::{window, Event, FileReader, HtmlElement, KeyEvent, MouseEvent};
 
-mod app;
-mod events;
-mod layout;
-mod schematic;
-mod state;
-mod visualizer3d;
+pub mod app;
+pub mod events;
+pub mod layout;
+pub mod schematic;
+pub mod state;
+pub mod visualizer3d;
 
 use console_error_panic_hook;
-
 
 // Pull in the console.log function so we can debug things more easily
 #[wasm_bindgen]
@@ -23,8 +25,7 @@ extern "C" {
     fn log(s: &str);
 }
 
-// This struct will be accessible from JS as a JS object that can be
-// created using `new Core()`
+/// Start the program running
 #[wasm_bindgen]
 pub fn start(app_area: HtmlElement) {
     log(&format!(

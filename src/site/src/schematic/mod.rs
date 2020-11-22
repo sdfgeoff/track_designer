@@ -1,10 +1,14 @@
+//! Draws a 2D schematic of the track system that includes handles so the
+//! user can manipulate the system.
+//! Note that SVG units are used as mm
+
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, MouseEvent, SvgElement, SvgGraphicsElement};
 
 use glam::Vec2;
 
-use tracktool::track_path::{WheelDescription};
+use tracktool::track_path::WheelDescription;
 
 mod handle;
 mod svg;
@@ -14,9 +18,14 @@ mod wheel;
 pub use track_path_segment::TrackPathSegmentDrawing;
 pub use wheel::WheelDrawing;
 
+/// Manages overall state of the schematic such as what the user has
+/// currently clicked on.
 pub struct Schematic {
-    //~ pub svg: SvgGraphicsElement,
+    /// A rectangle that is automatically adjusted to fit the SVG size
     pub background: Element,
+    
+    /// What element the user is currently manipulating. This is None 
+    /// whenever the user is not holding down the mouse button.
     pub selected_element: Option<Element>,
 }
 
@@ -26,6 +35,7 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
 }
+
 
 impl Schematic {
     pub fn new(svg: SvgGraphicsElement) -> Result<Self, JsValue> {
@@ -45,6 +55,8 @@ impl Schematic {
         })
     }
 
+    /// Ensures that the SVG fits all the elements in the drawing.
+    // TODO: use elements in the SVG rather than the wheel positions?
     pub fn update_bounding_box(
         &mut self,
         svg: &SvgElement,
@@ -78,13 +90,13 @@ impl Schematic {
         )?;
 
         self.background
-            .set_attribute("width", &format!("{}", dimensions[0]))?;
+            .set_attribute("width", &dimensions[0].to_string())?;
         self.background
-            .set_attribute("height", &format!("{}", dimensions[1]))?;
+            .set_attribute("height", &dimensions[1].to_string())?;
         self.background
-            .set_attribute("x", &format!("{}", top_left[0]))?;
+            .set_attribute("x", &top_left[0].to_string())?;
         self.background
-            .set_attribute("y", &format!("{}", top_left[1]))?;
+            .set_attribute("y", &top_left[1].to_string())?;
 
         Ok(())
     }
@@ -113,10 +125,9 @@ impl Schematic {
     }
 }
 
-pub fn get_drawing_id_from_element(
-    drawings: &Vec<WheelDrawing>,
-    elem: &Element,
-) -> Option<usize> {
+/// Checks through an array of `WheelDrawings` for a specified SVG element. If
+/// one of the drawings contains the element, it is returned.
+pub fn get_drawing_id_from_element(drawings: &Vec<WheelDrawing>, elem: &Element) -> Option<usize> {
     for (id, drawing) in drawings.iter().enumerate() {
         if drawing.contains_element(elem) {
             return Some(id);
