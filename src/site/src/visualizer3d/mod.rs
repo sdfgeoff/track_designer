@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext, MouseEvent};
+use web_sys::{window, HtmlCanvasElement, MouseEvent, WebGl2RenderingContext};
 
 // Pull in the console.log function so we can debug things more easily
 #[wasm_bindgen]
@@ -26,7 +26,7 @@ use shader_stl::ShaderStl;
 use stl::Stl;
 use textures::StaticTextures;
 
-pub struct Renderer {
+pub struct Visualizer3d {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
     stls: Vec<Stl>,
@@ -67,7 +67,7 @@ impl From<shader::ShaderError> for RendererError {
     }
 }
 
-impl Renderer {
+impl Visualizer3d {
     pub fn new(canvas: HtmlCanvasElement) -> Result<Self, RendererError> {
         let gl = get_gl_context(&canvas).map_err(|_| RendererError::NoContext)?;
 
@@ -187,9 +187,7 @@ impl Renderer {
         self.camera.elevation = f32::min(f32::max(self.camera.elevation, -1.4), 1.4);
         self.dirty = true;
     }
-    
-    
-    
+
     pub fn mouse_move(&mut self, event: MouseEvent) {
         const DRAG_SENSITIVITY: f32 = 5.0;
         match self.click_location {
@@ -198,10 +196,8 @@ impl Renderer {
                 let delta = (location.0 - new.0, location.1 - new.1);
                 self.click_location = Some(new);
 
-                let percentage_x =
-                    (delta.0 as f32) / (self.resolution.0 as f32) * DRAG_SENSITIVITY;
-                let percentage_y =
-                    (delta.1 as f32) / (self.resolution.0 as f32) * DRAG_SENSITIVITY;
+                let percentage_x = (delta.0 as f32) / (self.resolution.0 as f32) * DRAG_SENSITIVITY;
+                let percentage_y = (delta.1 as f32) / (self.resolution.0 as f32) * DRAG_SENSITIVITY;
 
                 self.drag_view((percentage_x, -percentage_y));
             }
@@ -214,7 +210,6 @@ impl Renderer {
     pub fn mouse_up(&mut self, _event: MouseEvent) {
         self.click_location = None;
     }
-    
 }
 
 fn get_gl_context(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, JsValue> {

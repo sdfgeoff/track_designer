@@ -7,9 +7,7 @@ function load(area, module_path) {
     import(module_path)
     .then((module) => {
         module.default().then(function(obj){
-            let core = new module.Core(area)
-            core.start()
-            area.core = core
+            module.start(area)
         }).catch(function(e){
             console.error("Failed to init module:", e)
             area.className = "error"

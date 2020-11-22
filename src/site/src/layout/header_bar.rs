@@ -1,8 +1,5 @@
 use wasm_bindgen::JsCast;
-use web_sys::{
-    window, HtmlButtonElement, 
-    HtmlInputElement, HtmlLiElement, HtmlUListElement
-};
+use web_sys::{window, HtmlButtonElement, HtmlInputElement, HtmlLiElement, HtmlUListElement};
 
 pub struct HeaderBar {
     pub logo: HtmlLiElement,

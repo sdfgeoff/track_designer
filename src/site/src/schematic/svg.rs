@@ -1,6 +1,6 @@
-use web_sys::{window, Element, KeyEvent, MouseEvent, SvgElement};
 use glam::Vec2;
 use wasm_bindgen::JsValue;
+use web_sys::{window, Element, KeyEvent, MouseEvent, SvgElement};
 
 pub fn create_svg_element(elem: &str) -> Result<Element, JsValue> {
     let document = window().unwrap().document().unwrap();
@@ -9,8 +9,8 @@ pub fn create_svg_element(elem: &str) -> Result<Element, JsValue> {
 }
 
 pub fn polar_to_cartesian(center: &Vec2, radius: f32, angle: f32) -> Vec2 {
-	Vec2::new(
-		center[0] + f32::cos(angle) * radius,
-		center[1] - f32::sin(angle) * radius, // SVG has zero at the top
-	)
+    Vec2::new(
+        center[0] + f32::cos(angle) * radius,
+        center[1] - f32::sin(angle) * radius, // SVG has zero at the top
+    )
 }

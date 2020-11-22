@@ -2,9 +2,10 @@ use glam::Vec3;
 use meshtools::mesh::{sort_vertex_group_radial, Mesh};
 use meshtools::tools::{generate_vertex_bridge, make_array};
 
-use super::track_path::TrackPath;
+use super::track_path;
 use super::track_surface;
 use track_outer_surfaces::TrackOuterSurfaceDescription;
+use track_path::WheelDescription;
 
 /// All the information needed to generate a track mesh. This is a
 /// complete, self-contained description of a track.
@@ -43,7 +44,7 @@ pub enum TrackShapeDescription {
     Straight(f32),
 
     /// Track follows a system of wheels.
-    Path(TrackPath),
+    Path(Vec<WheelDescription>),
 }
 
 impl TrackShapeDescription {
@@ -51,7 +52,7 @@ impl TrackShapeDescription {
         match self {
             TrackShapeDescription::Loop(length) => *length,
             TrackShapeDescription::Straight(length) => *length,
-            TrackShapeDescription::Path(path) => path.length(),
+            TrackShapeDescription::Path(path) => unimplemented!(), //path.length(),
         }
     }
 }

@@ -1,7 +1,8 @@
 /// Governs the location of all the major parts of the application.
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{window, HtmlCanvasElement, HtmlDivElement, HtmlElement, SvgElement};
+use web_sys::{window, HtmlCanvasElement, HtmlDivElement, HtmlElement, SvgGraphicsElement};
 
+use super::css;
 use super::header_bar;
 
 pub enum ViewMode {
@@ -16,12 +17,14 @@ pub struct Layout {
     pub pane_header_bar: HtmlDivElement,
 
     pub visualizer_canvas: HtmlCanvasElement,
-    pub schematic_svg: SvgElement,
+    pub schematic_svg: SvgGraphicsElement,
     pub header: header_bar::HeaderBar,
 }
 
 impl Layout {
     pub fn new(parent_area: &HtmlElement) -> Result<Self, JsValue> {
+        css::inject_css(include_str!("packed-style.css"));
+
         let pane_visualizer = append_div(parent_area);
         let pane_schematic = append_div(parent_area);
         let pane_parameters = append_div(parent_area);
@@ -39,7 +42,7 @@ impl Layout {
         let header = header_bar::HeaderBar::new().expect("Failed to make header bar");
         pane_header_bar.append_child(&header.container)?;
 
-        let schematic_svg: SvgElement = document
+        let schematic_svg: SvgGraphicsElement = document
             .create_element_ns(Some("http://www.w3.org/2000/svg"), "svg")?
             .dyn_into()?;
         schematic_svg.class_list().add_1("fill")?;
