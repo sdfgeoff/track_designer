@@ -1,39 +1,9 @@
 use glam::Vec2;
+use super::wheel::WheelDescription;
 
 /// Describes the route that a track takes. Contains no details
 /// about the wheels themselves
 
-#[derive(Debug)]
-pub struct WheelDescription {
-    pub position: Vec2,
-    pub circumference: f32,
-}
-
-impl WheelDescription {
-    pub fn radius(&self) -> f32 {
-        self.circumference / (2.0 * std::f32::consts::PI)
-    }
-}
-
-//~ impl TrackPath {
-//~ pub fn length(&self) -> f32 {
-//~ unimplemented!();
-//~ }
-
-//~ pub fn new() -> Self {
-//~ Self {
-//~ path: vec![
-//~ WheelDescription {
-//~ position: Vec2::new(-20.0, 0.0),
-//~ circumference: 30.0,
-//~ },
-//~ WheelDescription {
-//~ position: Vec2::new(20.0, 0.0),
-//~ circumference: 30.0,
-//~ },
-//~ ],
-//~ }
-//~ }
 
 /// Calculates the path the track will take when joining wheels
 pub fn calc_segments(path: &Vec<WheelDescription>) -> Vec<TrackPathSegment> {
